@@ -1,15 +1,19 @@
 import socket
 
-HOST = '127.0.0.1'
-PORT = 65432
+SERVER_ADDRESS = '127.0.0.1'
+SERVER_PORT = 65432
 
 # - si collega
-# - invia 'Hello, world'
-# - legge 1024 byte e li stampa
+# - invia un messaggio chiesto all'utente
+# - legge 2048 byte e li stampa
 
-with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-    s.connect((HOST, PORT))
-    s.sendall(b'Hello world!')
-    data = s.recv(1024)
-
-print('Received', data.decode())
+s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+s.connect((SERVER_ADDRESS, SERVER_PORT))
+dati = input("Inserisci messaggio per il server: ")
+dati = dati.encode()
+s.send(dati)
+dati = s.recv(2048)
+if dati:
+    dati = dati.decode()
+    print("Ho ricevuto dal server: ")
+    print(dati + '\n')
