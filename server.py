@@ -16,12 +16,25 @@ server_socket.bind((HOST, PORT))
 server_socket.listen(5)
 print(f"[{HOST}] In ascolto su {PORT}")
 
+operazioni = {
+    "somma": lambda a, b: a + b,
+    "sottrazione": lambda a, b: a - b,
+    "moltiplicazione": lambda a, b: a * b,
+    "divisione": lambda a, b: a / b,
+}
+
+
+def try_float(n):
+    try:
+        return float(n)
+    except ValueError:
+        return None
+
+
 while True:
     socket, address = server_socket.accept()
     print("Connessione ricevuta da " + str(address))
     print("Aspetto di ricevere i dati ")
-
-    counter = 0
 
     while True:
         dati = socket.recv(2048)
@@ -31,14 +44,24 @@ while True:
         dati = dati.decode()
         print("Ricevuto: '%s'" % dati)
 
-        if dati == '0':
+        if dati == 'exit':
             print("Chiudo la connessione con " + str(address))
             break
 
-        counter += 1
+        op_code, a, b = dati.split(";")
+        op = operazioni.get(op_code)
+        a = try_float(a)
+        b = try_float(b)
 
-        risposta = "Risposta a : " + \
-            str(address) + ". Il valore del contatore è : " + str(counter)
-        risposta = risposta.encode()
+        ris = ""
+        if not op:
+            ris = f'"{op_code}" operazione non riconosciuta'
+        elif not a:
+            ris = f'"{a}" non è un numero valido'
+        elif not b:
+            ris = f'"{b}" non è un numero valido'
+        else:
+            ris = f'Risposta a : {str(address)} il risultato dell\'opereazione "{op_code} tra {a} e {b} è {op(a, b)}'
 
-        socket.send(risposta)
+        ris = ris.encode()
+        socket.send(ris)

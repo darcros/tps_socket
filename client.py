@@ -11,14 +11,14 @@ print("Connesso a " + str((SERVER_ADDRESS, SERVER_PORT)))
 while True:
     try:
         dati = input(
-            "Inserisci i dati da inviare (0 per terminare la connessione): ")
+            'Inserisci i dati da inviare ("exit" per terminare la connessione): ')
     except EOFError:
-        print("\nOkay. Exit")
+        print("Okay. Exit")
         break
     if not dati:
         print("Non puoi inviare una stringa vuota!")
         continue
-    if dati == '0':
+    if dati == 'exit':
         print("Chiudo la connessione con il server!")
         break
 
@@ -35,6 +35,6 @@ while True:
     risposta = risposta.decode()
 
     print("Ricevuto dal server:")
-    print(risposta + '\n')
+    print(risposta)
 
 socket.close()
