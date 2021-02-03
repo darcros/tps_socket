@@ -3,27 +3,42 @@ import socket
 HOST = '127.0.0.1'
 PORT = 65432
 
-s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
 # Optionale: permette di riavviare subito il codice,
 # altrimenti bisognerebbe aspettare 2-4 minuti prima di poter riutilizzare(bindare) la stessa porta
-s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 
-s.bind((HOST, PORT))
-s.listen()
+# bind del socket alla porta
+server_socket.bind((HOST, PORT))
+
+# mette il socket in ascolto, con un backlog di 5 connessioni
+server_socket.listen(5)
 print(f"[{HOST}] In ascolto su {PORT}")
 
-clientsocket, address = s.accept()
-with clientsocket as cs:
-    print(f"Connessione da {address}")
+while True:
+    socket, address = server_socket.accept()
+    print("Connessione ricevuta da " + str(address))
+    print("Aspetto di ricevere i dati ")
+
+    counter = 0
+
     while True:
-        dati = cs.recv(1024)
-        dati.decode()
+        dati = socket.recv(2048)
         if not dati:
+            print("Fine dati dal client. Reset")
             break
         dati = dati.decode()
-        print(f"Ricevuto '{dati}' dal client")
-        dati = "Ciao, " + str(address) + ". Ho ricevuto questo: '" + dati + "'"
-        dati = dati.encode()
-        cs.send(dati)
-        print(f"Inviato al client: {dati}")
+        print("Ricevuto: '%s'" % dati)
+
+        if dati == '0':
+            print("Chiudo la connessione con " + str(address))
+            break
+
+        counter += 1
+
+        risposta = "Risposta a : " + \
+            str(address) + ". Il valore del contatore è : " + str(counter)
+        risposta = risposta.encode()
+
+        socket.send(risposta)
