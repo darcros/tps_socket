@@ -1,5 +1,5 @@
-from client import SERVER_ADDRESS, SERVER_PORT
 import socket
+from threading import Thread
 
 HOST = '127.0.0.1'
 PORT = 65432
@@ -76,6 +76,30 @@ def ricevi_comando(sock_listen):
     return ("command", comando)
 
 
+def gestisci_client(sock):
+    while True:
+        action, cmd = ricevi_comando(sock)
+        print("ricevuto comando")
+
+        if action == "exit":
+            break
+
+        status, res = esegui(cmd)
+
+        # invia risposta
+        if status == "error":
+            print("il comando ha prodotto un errore")
+            ris = "ERRORE: " + res
+        else:
+            print("il comando è andato a buon fine")
+            ris = res
+
+        ris = ris.encode()
+        sock.send(ris)
+
+    sock.close()
+
+
 def main():
     server_socket = avvia_server(HOST, PORT)
     print(f"[{HOST}] In ascolto su {PORT}")
@@ -83,27 +107,10 @@ def main():
     while True:
         sock, address = server_socket.accept()
 
-        while True:
-            action, cmd = ricevi_comando(sock)
-            print("ricevuto comando")
-
-            if action == "exit":
-                break
-
-            status, res = esegui(cmd)
-
-            # invia risposta
-            if status == "error":
-                print("il comando ha prodotto un errore")
-                ris = "ERRORE: " + res
-            else:
-                print("il comando è andato a buon fine")
-                ris = res
-
-            ris = ris.encode()
-            sock.send(ris)
-
-        sock.close()
+        try:
+            Thread(target=gestisci_client, args=(sock,)).start()
+        except:
+            sock.close()
 
 
 if __name__ == '__main__':
