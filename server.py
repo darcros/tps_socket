@@ -82,6 +82,7 @@ def gestisci_client(sock):
         print("ricevuto comando")
 
         if action == "exit":
+            print("ricevuto 'exit'")
             break
 
         status, res = esegui(cmd)
@@ -97,6 +98,7 @@ def gestisci_client(sock):
         ris = ris.encode()
         sock.send(ris)
 
+    print('chiudo connessione')
     sock.close()
 
 
