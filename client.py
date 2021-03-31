@@ -3,38 +3,45 @@ import socket
 SERVER_ADDRESS = '127.0.0.1'
 SERVER_PORT = 65432
 
+PROTOCOL = ['SYN', 'SYN ACK', 'ACK with Data', 'ACK for Data']
+
 socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 socket.connect((SERVER_ADDRESS, SERVER_PORT))
 print("Connesso a " + str((SERVER_ADDRESS, SERVER_PORT)))
 
 
+def send(seq):
+    print(f"<-- {seq} {PROTOCOL[seq]}")
+    data = seq.to_bytes(1, 'big')
+    socket.send(data)
+
+
+def recv():
+    data = socket.recv(2048)
+
+    if not data:
+        return None
+
+    seq = int.from_bytes(data, 'big')
+    print(f"--> {seq} {PROTOCOL[seq]}")
+    return seq
+
+
+# invia pacchetto iniziale: SYN
+send(0)
+
 while True:
-    try:
-        dati = input(
-            "Inserisci i dati da inviare (0 per terminare la connessione): ")
-    except EOFError:
-        print("\nOkay. Exit")
-        break
-    if not dati:
-        print("Non puoi inviare una stringa vuota!")
-        continue
-    if dati == '0':
-        print("Chiudo la connessione con il server!")
-        break
+    seq = recv()
 
-    dati = dati.encode()
-
-    socket.send(dati)
-
-    risposta = socket.recv(2048)
-
-    if not risposta:
+    if seq == None:
         print("Server non risponde. Exit")
         break
 
-    risposta = risposta.decode()
+    if seq >= len(PROTOCOL) - 1:
+        print("sequenza terminata")
+        break
 
-    print("Ricevuto dal server:")
-    print(risposta + '\n')
+    send(seq + 1)
+
 
 socket.close()
