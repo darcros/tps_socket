@@ -27,21 +27,21 @@ def recv():
     return seq
 
 
-# invia pacchetto iniziale: SYN
-send(0)
+if __name__ == '__main__':
+    # invia pacchetto iniziale: SYN
+    send(0)
 
-while True:
-    seq = recv()
+    while True:
+        seq = recv()
 
-    if seq == None:
-        print("Server non risponde. Exit")
-        break
+        if seq == None:
+            print("Server non risponde. Exit")
+            break
 
-    if seq >= len(PROTOCOL) - 1:
-        print("sequenza terminata")
-        break
+        if seq >= len(PROTOCOL) - 1:
+            print("sequenza terminata")
+            break
 
-    send(seq + 1)
+        send(seq + 1)
 
-
-socket.close()
+    socket.close()

@@ -36,20 +36,23 @@ def recv(socket):
     return seq
 
 
-while True:
-    socket, address = server_socket.accept()
-    print("Connessione ricevuta da " + str(address))
-    print("Aspetto di ricevere i dati ")
-
+if __name__ == '__main__':
     while True:
-        seq = recv(socket)
+        socket, address = server_socket.accept()
+        print("Connessione ricevuta da " + str(address))
+        print("Aspetto di ricevere i dati ")
 
-        if seq == None:
-            print("client si è disconnesso. Exit")
-            break
+        while True:
+            seq = recv(socket)
 
-        if seq >= len(PROTOCOL) - 1:
-            print("sequenza terminata")
-            break
+            if seq == None:
+                print("client si è disconnesso")
+                break
 
-        send(socket, seq + 1)
+            if seq >= len(PROTOCOL) - 1:
+                print("sequenza terminata")
+                break
+
+            send(socket, seq + 1)
+        
+        socket.close()
